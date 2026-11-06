@@ -3,6 +3,7 @@ import { api } from '../api/client'
 import { useSite } from '../context/SiteContext'
 import { SmartLink } from './Header'
 import Icon, { PLATFORM_LABELS, SocialIcon } from './Icon'
+import Wave from './Wave'
 
 function SubscribeForm() {
   const [email, setEmail] = useState('')
@@ -91,6 +92,7 @@ export default function Footer() {
 
   return (
     <footer className="site-footer">
+      <Wave className="footer-wave" />
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand">

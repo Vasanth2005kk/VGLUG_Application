@@ -25,6 +25,22 @@ export const DEFAULT_NAV = [
   { id: 'contact', system_key: 'contact', label: 'Contact Us', url: '/contact', children: [] },
 ]
 
+// Join and Contact stay separate top-level items in the API (the admin validator
+// requires it), so they are grouped into one dropdown here, where Join first appears.
+// Donate is not a backend system route either, so it is added here as the last item.
+const CONNECT_KEYS = new Set(['join', 'contact'])
+const DONATE_ITEM = { id: 'donate', system_key: 'donate', label: 'Donate', url: '/donate', children: [] }
+
+function buildNav(nav) {
+  const children = nav.filter((item) => CONNECT_KEYS.has(item.system_key))
+  const group = { id: 'connect', system_key: 'connect', label: 'Get Connected', url: '', children }
+  const grouped = nav.flatMap((item) => {
+    if (item === children[0]) return [group]
+    return CONNECT_KEYS.has(item.system_key) ? [] : [item]
+  })
+  return nav.some((item) => item.url === DONATE_ITEM.url) ? grouped : [...grouped, DONATE_ITEM]
+}
+
 export function SmartLink({ item, className, onClick, children, ...rest }) {
   if (isExternal(item.url)) {
     const newTab = item.open_in_new_tab
@@ -144,7 +160,7 @@ function Dropdown({ item, onNavigate }) {
 
 export default function Header() {
   const site = useSite()
-  const nav = site?.data?.nav?.length ? site.data.nav : DEFAULT_NAV
+  const nav = buildNav(site?.data?.nav?.length ? site.data.nav : DEFAULT_NAV)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
   const toggleRef = useRef(null)
@@ -173,7 +189,7 @@ export default function Header() {
     <header className="site-header">
       <div className="container">
         <Link to="/" className="brand" aria-label="VGLUG Foundation home">
-          <img className="brand-logo" src="/vglug-logo-128.png" alt="" width="48" height="48" />
+          <img className="brand-logo" src="/vglug-logo-128.png" alt="" width="55" height="55" />
           <span className="brand-text">
             <span className="brand-name">VGLUG Foundation</span>
             <span className="brand-sub">Viluppuram GNU/Linux Users Group</span>
@@ -187,7 +203,7 @@ export default function Header() {
                 <Dropdown key={item.system_key ?? item.id} item={item} onNavigate={close} />
               ) : (
                 <li key={item.system_key ?? item.id}>
-                  <SmartLink item={item} className={`nav-link${item.system_key === 'join' ? ' nav-cta' : ''}`} onClick={close}>
+                  <SmartLink item={item} className="nav-link" onClick={close}>
                     {item.label}
                   </SmartLink>
                 </li>

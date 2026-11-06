@@ -4,6 +4,7 @@ import { Loading } from './components/States'
 import { AuthProvider } from './context/AuthContext'
 import { SiteProvider } from './context/SiteContext'
 import DetailPage from './pages/public/DetailPage'
+import DonatePage from './pages/public/DonatePage'
 import HomePage from './pages/public/HomePage'
 import InfoPage from './pages/public/InfoPage'
 import ListingPage from './pages/public/ListingPage'
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
       { path: '/about', element: <InfoPage key="about" pageKey="about" /> },
       { path: '/join', element: <InfoPage key="join" pageKey="join" /> },
       { path: '/contact', element: <InfoPage key="contact" pageKey="contact" /> },
+      { path: '/donate', element: <DonatePage /> },
       { path: '/meetups', element: <ListingPage key="meetup" type="meetup" /> },
       { path: '/events', element: <ListingPage key="event" type="event" /> },
       { path: '/blogs', element: <ListingPage key="blog" type="blog" /> },

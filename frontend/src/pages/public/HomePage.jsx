@@ -1,154 +1,225 @@
 import { Link } from 'react-router-dom'
-import ContentCard from '../../components/ContentCard'
-import Html from '../../components/Html'
 import Icon from '../../components/Icon'
-import PageSections from '../../components/PageSections'
-import { CardSkeletons, EmptyState, ErrorState } from '../../components/States'
-import { useApi, useDocumentTitle } from '../../hooks/useApi'
-import { isExternal } from '../../lib/format'
+import Wave from '../../components/Wave'
+import { useDocumentTitle } from '../../hooks/useApi'
 
-const EXPLORE = [
-  { to: '/meetups', label: 'Meetups', glyph: 'Weekly · open to all', text: 'Technical sessions and discussions for students, professionals and free software contributors.' },
-  { to: '/events', label: 'Events', glyph: 'Workshops & camps', text: 'Software Freedom Day, Education Freedom Day, summer and winter camps, exhibitions and more.' },
-  { to: '/blogs', label: 'Blogs', glyph: 'Stories & updates', text: 'Technical and community articles from the VGLUG community.' },
+const TELEGRAM_URL = 'https://t.me/vpmglug'
+const MAILING_LIST_URL = 'https://groups.google.com/forum/#!forum/viluppuramglug/join'
+
+const WHAT_WE_DO = [
+  {
+    title: 'Software Freedom Day',
+    text: 'A yearly public exhibition on Free Software, online privacy, malware and surveillance — open to everyone since 2013.',
+    icon: 'calendar',
+    to: '/events',
+  },
+  {
+    title: '100 Villages 100 GLUGs',
+    text: 'User groups in villages that bring FOSS and cyber-crime awareness to the doorsteps of rural communities.',
+    icon: 'home',
+    to: '/about',
+  },
+  {
+    title: 'Free Tech Training',
+    text: 'Weekend meetups and courses in Python, GenAI, DevOps, cyber security, React and Flutter for rural youth.',
+    icon: 'code',
+    to: '/meetups',
+  },
 ]
 
-function ExploreSection() {
+// Add a `photo` URL to replace the placeholder in a circle.
+const JOURNEY = [
+  { title: 'Mini Debian Conference Tamil Nadu 2023', date: 'Dec 2022', tone: 'red' },
+  { title: 'இலவச திறன் மேம்பாட்டு பயிற்சி தொடக்க விழா', date: 'Aug 2022', tone: 'maroon', lang: 'ta' },
+  { title: 'VGLUG Wikimedia Hackathon 2022', date: 'May 2022', tone: 'dark' },
+]
+
+const AWARDS = [
+  { year: '2021', title: 'Achievers Award', from: 'from the Chief Minister of Tamil Nadu' },
+  { year: '2020', title: 'Young Social Change Maker', from: 'Trust for Youth and Child Leadership', featured: true },
+  { year: '2020', title: 'Nambikkai Viruthu', from: 'Vikatan' },
+]
+
+function WhatWeDo() {
   return (
-    <section className="section" aria-labelledby="explore-title">
-      <div className="container">
-        <div className="section-head">
-          <div>
-            <span className="section-kicker" aria-hidden="true" />
-            <h2 id="explore-title">Explore</h2>
+    <section className="home-band" aria-labelledby="what-we-do-title">
+      <Wave />
+      <div className="home-band-inner">
+        <div className="container">
+          <div className="home-band-head">
+            <h2 id="what-we-do-title">What we do</h2>
+            <p>Technology should not be limited to a few people. It should reach millions — and give every user freedom.</p>
           </div>
+          <ol className="home-work">
+            {WHAT_WE_DO.map((w, i) => (
+              <li key={w.title}>
+                <div className="home-work-mark">
+                  <span className="home-work-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="home-work-icon" aria-hidden="true"><Icon name={w.icon} /></span>
+                </div>
+                <h3>{w.title}</h3>
+                <p>{w.text}</p>
+                <Link to={w.to} className="home-work-link" aria-label={`Learn more about ${w.title}`}>Learn more <Icon name="arrow" /></Link>
+              </li>
+            ))}
+          </ol>
         </div>
-        <div className="explore-grid">
-          {EXPLORE.map((e) => (
-            <Link key={e.to} to={e.to} className="explore-card">
-              <span className="glyph">{e.glyph}</span>
-              <div>
-                <h3>{e.label}</h3>
-                <p>{e.text}</p>
+      </div>
+      <Wave flip />
+    </section>
+  )
+}
+
+function Journey() {
+  return (
+    <section className="home-section" aria-labelledby="journey-title">
+      <div className="container">
+        <div className="home-journey-head">
+          <h2 id="journey-title"><span className="home-star" aria-hidden="true">★</span> From our journey</h2>
+          <Link to="/events" className="home-more">All events <Icon name="arrow" /></Link>
+        </div>
+        <div className="home-journey">
+          <svg className="home-journey-line" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 80 C 80 40, 130 30, 200 70 S 340 170, 480 110 S 660 10, 800 60 S 980 190, 1040 150 S 1150 90, 1200 50" />
+          </svg>
+          <ul>
+            {JOURNEY.map((j) => (
+              <li key={j.date}>
+                <div className="home-photo">
+                  {j.photo ? <img src={j.photo} alt="" loading="lazy" /> : <Icon name="image" />}
+                </div>
+                <span className={`home-date home-date-${j.tone}`}>{j.date}</span>
+                <h3 lang={j.lang}>{j.title}</h3>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Volunteers() {
+  return (
+    <section className="home-section home-statement" aria-labelledby="volunteers-title">
+      <div className="container">
+        <h2 id="volunteers-title">Built by our volunteers</h2>
+        <p>
+          We made <mark>Sangailakkiyam</mark> to read Sangam literature, <mark>Spell4Wiki</mark> to give Wikipedia a
+          voice, <mark>VizhiTamil</mark> so Tamil books can be heard — and brought <mark>Mozilla, VLC &amp; NewPipe</mark> into Tamil.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function Awards() {
+  return (
+    <section className="home-section home-awards" aria-labelledby="awards-title">
+      <div className="container">
+        <h2 id="awards-title">Recognised for change</h2>
+        <ul>
+          {AWARDS.map((a) => (
+            <li key={a.title} className={a.featured ? 'is-featured' : undefined}>
+              <div className="home-award">
+                <span className="home-star" aria-hidden="true">★</span>
+                <strong>{a.year}</strong>
+                <h3>{a.title}</h3>
+                <p>{a.from}</p>
               </div>
-              <span className="go" aria-hidden="true"><Icon name="arrow" /></span>
-            </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   )
 }
 
-function Latest({ type, title, href, query, emptyText, alt }) {
-  const res = useApi(`/api/content?type=${type}&per_page=3${query || ''}`)
+function ExternalButton({ href, className, children }) {
   return (
-    <section className={`section${alt ? ' section-alt' : ''}`} aria-labelledby={`latest-${type}`}>
-      <div className="container">
-        <div className="section-head">
-          <div>
-            <span className="section-kicker" aria-hidden="true" />
-            <h2 id={`latest-${type}`}>{title}</h2>
-          </div>
-          <Link to={href} className="text-link" style={{ marginTop: 0 }}>
-            View all <Icon name="arrow" />
-          </Link>
-        </div>
-        {res.loading ? (
-          <CardSkeletons />
-        ) : res.error ? (
-          <ErrorState error={res.error} onRetry={res.reload} />
-        ) : res.data.length === 0 ? (
-          <EmptyState title={emptyText.title}>
-            <p>{emptyText.body}</p>
-          </EmptyState>
-        ) : (
-          <div className="content-grid">
-            {res.data.map((item) => <ContentCard key={item.id} item={item} />)}
-          </div>
-        )}
-      </div>
-    </section>
+    <a href={href} className={className} target="_blank" rel="noopener noreferrer">
+      {children}<span className="visually-hidden"> (opens in a new tab)</span>
+    </a>
   )
 }
 
-function CtaLink({ url, label, className }) {
-  if (isExternal(url)) {
-    return <a className={className} href={url} target="_blank" rel="noopener noreferrer">{label} <Icon name="external" /></a>
-  }
-  return <Link className={className} to={url}>{label} <Icon name="arrow" /></Link>
+const HERO_BADGES = [
+  { value: '10000+', label: 'youth trained', tone: 'red' },
+  { value: '100', label: 'village GLUGs goal', tone: 'maroon' },
+  { value: '2013', label: 'founded', tone: 'dark' },
+]
+
+function HeroEmblem() {
+  return (
+    <figure className="hero-emblem">
+      <svg className="hero-ring" viewBox="0 0 500 500" aria-hidden="true">
+        <circle className="hero-ring-dots" cx="250" cy="250" r="246" />
+        <path id="hero-ring-path" fill="none" d="M 30 250 a 220 220 0 1 1 440 0 a 220 220 0 1 1 -440 0" />
+        <text className="hero-ring-text">
+          <textPath href="#hero-ring-path" textLength="1370" lengthAdjust="spacing">
+            FREE SOFTWARE ★ FREE SOCIETY ★ VILUPPURAM ★ SINCE 2013 ★
+          </textPath>
+        </text>
+      </svg>
+      <div className="hero-disc">
+        <img src="/vglug-logo-512.png" alt="VGLUG Foundation logo" width="512" height="512" fetchPriority="high" />
+      </div>
+      <ul className="hero-badges">
+        {HERO_BADGES.map((b) => (
+          <li key={b.tone} className={`hero-badge hero-badge-${b.tone}`}>
+            <strong>{b.value}</strong>
+            <span>{b.label}</span>
+          </li>
+        ))}
+      </ul>
+    </figure>
+  )
 }
 
 export default function HomePage() {
-  const page = useApi('/api/pages/home')
   useDocumentTitle('Home')
-  const data = page.data
-  const sections = data?.sections || []
-  const stats = sections[0]?.layout === 'stats' ? sections[0] : null
-  const rest = stats ? sections.slice(1) : sections
-  const split = rest.findIndex((s) => s.anchor === 'what-we-do')
-  const before = split >= 0 ? rest.slice(0, split + 1) : rest
-  const after = split >= 0 ? rest.slice(split + 1) : []
 
   return (
     <>
       <section className="hero" aria-labelledby="hero-title">
         <div className="container hero-inner">
-          <div>
-            {page.loading ? (
-              <div aria-hidden="true">
-                <div className="skeleton" style={{ height: 18, width: 260, marginBottom: 24 }} />
-                <div className="skeleton" style={{ height: 180, maxWidth: 640, marginBottom: 24 }} />
-                <div className="skeleton" style={{ height: 80, maxWidth: 560 }} />
-              </div>
-            ) : (
-              <>
-                <p className="eyebrow">{data?.eyebrow || 'VGLUG Foundation'}</p>
-                <h1 id="hero-title">{data?.title || 'Viluppuram GNU/Linux Users Group'}</h1>
-                {data?.intro_html ? (
-                  <Html html={data.intro_html} className="lead" />
-                ) : (
-                  <p className="lead">A non-profit Free and Open Source Software community.</p>
-                )}
-                <div className="hero-actions">
-                  {data?.cta_url && <CtaLink url={data.cta_url} label={data.cta_label} className="btn btn-lg" />}
-                  <Link to="/meetups" className="btn btn-outline btn-lg">Upcoming meetups</Link>
-                </div>
-              </>
-            )}
+          <div className="hero-copy">
+            <p className="eyebrow">
+              <span className="hero-highlight">Viluppuram GNU/Linux Users Group</span>{' '}
+              <span className="hero-since">· Since 2013</span>
+            </p>
+            <h1 id="hero-title">
+              Free Software<br />
+              for Every{' '}
+              <em>
+                Village
+                <svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M2 8 C 40 3, 85 11, 130 7 S 185 5, 198 10" />
+                </svg>
+              </em>,<br />
+              Every Student.
+            </h1>
+            <p className="hero-tagline">Bringing Free Software to Everyone!</p>
+            <p className="lead">
+              A volunteer-driven FOSS movement making technology, knowledge and digital freedom accessible to
+              everyone. Through GNU/Linux, community meetups and hands-on training, we empower rural youth, inspire
+              innovation and bring the freedom of technology to underserved communities.
+            </p>
+            <div className="hero-actions">
+              <Link to="/join" className="btn btn-lg">Join VGLUG <Icon name="arrow" /></Link>
+              <Link to="/events" className="btn btn-outline btn-lg">Explore Our Activities</Link>
+            </div>
           </div>
-          <figure className="emblem" style={{ margin: 0 }}>
-            <img src="/vglug-logo-512.png" alt="VGLUG Foundation logo" width="440" height="440" fetchPriority="high" />
-          </figure>
+          <HeroEmblem />
         </div>
       </section>
 
-      {stats && (
-        <section className="stats-band" aria-labelledby="stats-title">
-          <div className="container">
-            <h2 id="stats-title" className="visually-hidden">{stats.heading || 'Our impact'}</h2>
-            <div className="stats">
-              {stats.items.map((it, i) => (
-                <div className="stat" key={i}>
-                  <div className="stat-value">{it.title}</div>
-                  <p className="stat-label">{it.subtitle}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      <PageSections sections={before} altStart={0} />
-      <ExploreSection />
-      <PageSections sections={after} altStart={0} />
-
-      <Latest alt type="meetup" title="Upcoming meetups" href="/meetups" query="&when=upcoming"
-        emptyText={{ title: 'No upcoming meetups announced yet', body: 'New community meetups will appear here as soon as they are published.' }} />
-      <Latest type="event" title="Upcoming events" href="/events" query="&when=upcoming"
-        emptyText={{ title: 'No upcoming events announced yet', body: 'Workshops, camps and celebrations will appear here when they are published.' }} />
-      <Latest alt type="blog" title="Latest from the blog" href="/blogs"
-        emptyText={{ title: 'No articles yet', body: 'Technical and community articles will appear here once published.' }} />
+      <div className="home-sections">
+        <WhatWeDo />
+        <Journey />
+        <Volunteers />
+        <Awards />
+      </div>
     </>
   )
 }

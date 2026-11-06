@@ -38,6 +38,7 @@ const PATHS = {
   upload: 'M12 16V4M7 9l5-5 5 5M4 15v5h16v-5',
   lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
   home: 'M3 11l9-8 9 8M5 9v12h14V9',
+  code: 'M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16',
   layout: 'M3 3h18v18H3zM3 9h18M9 9v12',
   nav: 'M3 5h18M3 12h12M3 19h6',
   inbox: 'M3 13h5l2 3h4l2-3h5M5 4h14l2 9v7H3v-7z',

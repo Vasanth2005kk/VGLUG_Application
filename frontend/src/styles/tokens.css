@@ -1,5 +1,5 @@
 /* VGLUG design tokens. Brand colours are fixed; everything else derives from them.
-   Square corners only: this project never uses border-radius. */
+   Square corners only, except the home page's pill buttons and circles. */
 
 :root {
   /* Brand (exact) */
@@ -23,7 +23,7 @@
 
   --container: 1200px;
   --measure: 70ch;
-  --header-h: 72px;
+  --header-h: 82px;
   --rule: 1px;
   --rule-strong: 2px;
   --shadow-offset: 6px;

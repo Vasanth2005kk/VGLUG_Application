@@ -70,8 +70,20 @@ describe('navigation', () => {
     const nav = screen.getByRole('navigation', { name: 'Main' })
     await waitFor(() => expect(fetch).toHaveBeenCalled())
     const top = within(nav).getAllByRole('listitem').filter((li) => li.parentElement.parentElement === nav)
-    expect(top.map((li) => li.querySelector('a,button').textContent.trim())).toEqual(['Home', 'Explore', 'About Us', 'Join Us', 'Contact Us'])
+    expect(top.map((li) => li.querySelector('a,button').textContent.trim())).toEqual(['Home', 'Explore', 'About Us', 'Get Connected', 'Donate'])
+    expect(within(nav).getByRole('link', { name: 'Donate' })).toHaveAttribute('href', '/donate')
+  })
+
+  it('groups Join Us and Contact Us under Get Connected', async () => {
+    const user = userEvent.setup()
+    renderHeader()
+    const nav = screen.getByRole('navigation', { name: 'Main' })
+    await waitFor(() => expect(fetch).toHaveBeenCalled())
+    expect(within(nav).queryByRole('link', { name: 'Join Us' })).toBeNull()
+
+    await user.click(within(nav).getByRole('button', { name: /get connected/i }))
     expect(within(nav).getByRole('link', { name: 'Join Us' })).toHaveAttribute('href', '/join')
+    expect(within(nav).getByRole('link', { name: 'Contact Us' })).toHaveAttribute('href', '/contact')
   })
 
   it('Explore dropdown works with keyboard and click', async () => {
