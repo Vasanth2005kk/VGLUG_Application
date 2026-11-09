@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { EVENT_STATUS_LABEL, TYPE_META, dateParts, eventRange, formatDate } from '../lib/format'
+import { EVENT_STATUS_LABEL, TYPE_META, dateParts, eventDates, formatDate } from '../lib/format'
 import Icon from './Icon'
 import { LikeButton, ShareButton } from './Interactions'
 
@@ -36,7 +36,7 @@ export default function ContentCard({ item, headingLevel = 3 }) {
         </H>
         {ev && (
           <div className="card-meta" style={{ fontFamily: 'var(--font-body)', fontSize: '0.92rem' }}>
-            <span><Icon name="clock" />{eventRange(ev)}</span>
+            <span><Icon name="calendar" />{eventDates(ev)}</span>
             {(ev.location_name || ev.is_online) && (
               <span><Icon name={ev.is_online ? 'globe' : 'pin'} />{ev.location_name || 'Online'}</span>
             )}

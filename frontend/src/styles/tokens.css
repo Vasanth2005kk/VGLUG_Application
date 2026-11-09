@@ -1,5 +1,6 @@
 /* VGLUG design tokens. Brand colours are fixed; everything else derives from them.
-   Square corners only, except the home page's pill buttons and circles. */
+   Square corners only, except the home page's pills and circles and other round controls
+   (author avatar, back-to-top button). */
 
 :root {
   /* Brand (exact) */

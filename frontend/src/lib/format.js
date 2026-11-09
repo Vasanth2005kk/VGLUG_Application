@@ -20,7 +20,12 @@ function safeDate(iso) {
 export function formatDate(iso, opts = {}) {
   const d = safeDate(iso)
   if (!d) return ''
-  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', ...opts }).format(d)
+  try {
+    return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', ...opts }).format(d)
+  } catch {
+    const { timeZone: _tz, ...rest } = opts
+    return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', ...rest }).format(d)
+  }
 }
 
 export function formatDateTime(iso, timeZone) {
@@ -63,6 +68,21 @@ export function eventRange(event) {
   if (!event.ends_at) return start
   const sameDay = formatDate(event.starts_at, { timeZone: tz }) === formatDate(event.ends_at, { timeZone: tz })
   return sameDay ? `${start} – ${formatTime(event.ends_at, tz)}` : `${start} – ${formatDateTime(event.ends_at, tz)}`
+}
+
+/** Event dates without times, e.g. "Sat, 28 Jan 2023" or "28 Jan 2023 – 29 Jan 2023". */
+export function eventDates(event) {
+  if (!event) return ''
+  const tz = event.timezone
+  const start = formatDate(event.starts_at, { timeZone: tz })
+  const end = event.ends_at ? formatDate(event.ends_at, { timeZone: tz }) : start
+  return start === end ? formatDate(event.starts_at, { weekday: 'short', timeZone: tz }) : `${start} – ${end}`
+}
+
+/** Approximate reading time in minutes for rendered HTML. */
+export function readingMinutes(html) {
+  const words = (html || '').replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / 230))
 }
 
 export function isPast(event) {

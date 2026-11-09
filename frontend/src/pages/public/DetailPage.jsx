@@ -7,48 +7,53 @@ import Icon from '../../components/Icon'
 import { LikeButton, ShareButton } from '../../components/Interactions'
 import { ErrorState, Loading, NotFoundState } from '../../components/States'
 import { useApi, useDocumentTitle } from '../../hooks/useApi'
-import { EVENT_STATUS_LABEL, TYPE_META, eventRange, formatDate, isPast } from '../../lib/format'
+import { EVENT_STATUS_LABEL, TYPE_META, eventDates, formatDate, isPast, readingMinutes } from '../../lib/format'
 
-export function EventPanel({ event, title }) {
+/** Details panel. Event rows appear when `event` is given; `children` adds more rows. */
+export function EventPanel({ event, title, children, className = '' }) {
   const past = isPast(event)
   return (
-    <aside className="event-panel" aria-label="Event details">
+    <aside className={`event-panel ${className}`.trim()} aria-label={title}>
       <h2>{title}</h2>
       <dl>
-        <div>
-          <dt>Status</dt>
-          <dd><span className={`badge badge-${event.event_status}`}>{EVENT_STATUS_LABEL[event.event_status]}{past && event.event_status === 'scheduled' ? ' · ended' : ''}</span></dd>
-        </div>
-        <div>
-          <dt>When</dt>
-          <dd>{eventRange(event)}</dd>
-          <dd className="muted mono" style={{ fontSize: '0.8rem', fontWeight: 400 }}>Time zone: {event.timezone}</dd>
-        </div>
-        {(event.location_name || event.address) && (
-          <div>
-            <dt>Where</dt>
-            {event.location_name && <dd>{event.location_name}</dd>}
-            {event.address && <dd style={{ fontWeight: 400, whiteSpace: 'pre-line' }}>{event.address}</dd>}
-          </div>
+        {event && (
+          <>
+            <div>
+              <dt>Status</dt>
+              <dd><span className={`badge badge-${event.event_status}`}>{EVENT_STATUS_LABEL[event.event_status]}{past && event.event_status === 'scheduled' ? ' · ended' : ''}</span></dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd>{eventDates(event)}</dd>
+            </div>
+            {(event.location_name || event.address) && (
+              <div>
+                <dt>Where</dt>
+                {event.location_name && <dd>{event.location_name}</dd>}
+                {event.address && <dd style={{ fontWeight: 400, whiteSpace: 'pre-line' }}>{event.address}</dd>}
+              </div>
+            )}
+            {event.is_online && (
+              <div>
+                <dt>Online</dt>
+                <dd>
+                  {event.online_url ? (
+                    <a href={event.online_url} target="_blank" rel="noopener noreferrer">Join online <Icon name="external" /></a>
+                  ) : 'Online — link to be shared'}
+                </dd>
+              </div>
+            )}
+            {event.registration_info && (
+              <div>
+                <dt>Registration</dt>
+                <dd style={{ fontWeight: 400, whiteSpace: 'pre-line' }}>{event.registration_info}</dd>
+              </div>
+            )}
+          </>
         )}
-        {event.is_online && (
-          <div>
-            <dt>Online</dt>
-            <dd>
-              {event.online_url ? (
-                <a href={event.online_url} target="_blank" rel="noopener noreferrer">Join online <Icon name="external" /></a>
-              ) : 'Online — link to be shared'}
-            </dd>
-          </div>
-        )}
-        {event.registration_info && (
-          <div>
-            <dt>Registration</dt>
-            <dd style={{ fontWeight: 400, whiteSpace: 'pre-line' }}>{event.registration_info}</dd>
-          </div>
-        )}
+        {children}
       </dl>
-      {event.registration_url && !past && event.event_status !== 'cancelled' && (
+      {event?.registration_url && !past && event.event_status !== 'cancelled' && (
         <a className="btn" href={event.registration_url} target="_blank" rel="noopener noreferrer">
           Register <Icon name="external" /><span className="visually-hidden"> (opens in a new tab)</span>
         </a>
@@ -96,66 +101,88 @@ export default function DetailPage({ type }) {
   if (res.error) return <div className="container status-page"><ErrorState error={res.error} onRetry={res.reload} /></div>
 
   const ev = item.event
+  const minutes = readingMinutes(item.body_html)
+  const published = formatDate(item.published_at)
+  const updated = item.updated_at && formatDate(item.updated_at) !== published ? formatDate(item.updated_at) : null
+  const comments = item.comment_count + commentBump
+
   return (
-    <article>
-      <header className="detail-header">
-        <div className="container">
+    <article className="post">
+      <div className="post-grid">
+        <header className="post-col post-header">
           <nav className="crumbs" aria-label="Breadcrumb">
             <Link to="/">Home</Link><span aria-hidden="true">/</span>
             <Link to={`/${meta.path}`}>{meta.plural}</Link><span aria-hidden="true">/</span>
             <span aria-current="page">{item.title}</span>
           </nav>
-          <p className="eyebrow">{meta.label}</p>
           <h1>{item.title}</h1>
-          {item.summary && <p className="detail-summary">{item.summary}</p>}
+          {item.summary && <p className="post-subtitle">{item.summary}</p>}
           {ev && ev.event_status !== 'scheduled' && (
             <div className={`notice ${ev.event_status === 'cancelled' ? 'notice-error' : 'notice-warning'} event-status-banner`} role="note">
               <p>This {meta.label.toLowerCase()} is {EVENT_STATUS_LABEL[ev.event_status].toLowerCase()}.</p>
             </div>
           )}
-          <div className="byline">
-            <span><Icon name="user" /> {item.author}</span>
-            {item.published_at && <span>Published <time dateTime={item.published_at}>{formatDate(item.published_at)}</time></span>}
-            {item.updated_at && item.published_at && formatDate(item.updated_at) !== formatDate(item.published_at) && (
-              <span>Updated <time dateTime={item.updated_at}>{formatDate(item.updated_at)}</time></span>
-            )}
-            {ev && <span><Icon name="calendar" /> {eventRange(ev)}</span>}
-          </div>
-        </div>
-      </header>
-
-      <div className="container">
-        {item.cover && (
-          <figure className="detail-cover">
-            <img src={item.cover.url} alt={item.cover.alt_text || ''} width={item.cover.width || 1200} height={item.cover.height || 630} decoding="async" />
-            {item.cover.caption && <figcaption>{item.cover.caption}</figcaption>}
-          </figure>
-        )}
-        <div className={`detail-layout${ev ? ' has-aside' : ''}`}>
-          <div style={{ minWidth: 0 }}>
-            <Html html={item.body_html} />
-            {item.gallery?.length > 0 && (
-              <section aria-labelledby="gallery-title" style={{ marginTop: 'var(--space-7)' }}>
-                <h2 id="gallery-title">Gallery</h2>
-                <div className="gallery">
-                  {item.gallery.map((m) => <GalleryItem key={m.id} media={m} />)}
-                </div>
-              </section>
-            )}
-            <div className="engage-bar">
-              <LikeButton contentId={item.id} initialCount={item.like_count} initialLiked={item.liked} />
-              <a href="#comments-title" className="action-btn">
-                <Icon name="comment" /> <span className="count">{item.comment_count + commentBump}</span> Comments
-              </a>
-              <ShareButton path={item.path} title={item.title} />
+          <div className="post-author">
+            <span className="post-avatar" aria-hidden="true">{(item.author || 'V').trim().charAt(0).toUpperCase()}</span>
+            <div>
+              <p className="post-author-name">{item.author}</p>
+              <p className="post-meta">
+                {minutes} min read
+                {published && <> · <time dateTime={item.published_at}>{published}</time></>}
+              </p>
             </div>
-            <Comments contentId={item.id} onPosted={() => setCommentBump((n) => n + 1)} />
           </div>
-          {ev && (
-            <div className="detail-aside">
-              <EventPanel event={ev} title={`${meta.label} details`} />
+          <div className="post-bar">
+            <a href="#comments-title" className="action-btn">
+              <Icon name="comment" /> <span className="count">{comments}</span><span className="visually-hidden"> comments</span>
+            </a>
+            <ShareButton path={item.path} title={item.title} placement="below" />
+          </div>
+        </header>
+
+        <EventPanel event={ev} title={`${meta.label} details`} className="post-aside">
+          {published && (
+            <div>
+              <dt>Published</dt>
+              <dd><time dateTime={item.published_at}>{published}</time></dd>
             </div>
           )}
+          {updated && (
+            <div>
+              <dt>Updated</dt>
+              <dd><time dateTime={item.updated_at}>{updated}</time></dd>
+            </div>
+          )}
+          <div>
+            <dt>Reading time</dt>
+            <dd>{minutes} min</dd>
+          </div>
+        </EventPanel>
+
+        <div className="post-col post-content">
+          {item.cover && (
+            <figure className="post-cover">
+              <img src={item.cover.url} alt={item.cover.alt_text || ''} width={item.cover.width || 1200} height={item.cover.height || 630} decoding="async" />
+              {item.cover.caption && <figcaption>{item.cover.caption}</figcaption>}
+            </figure>
+          )}
+          <Html html={item.body_html} className="prose post-body" />
+          {item.gallery?.length > 0 && (
+            <section aria-labelledby="gallery-title" className="post-gallery">
+              <h2 id="gallery-title">Gallery</h2>
+              <div className="gallery">
+                {item.gallery.map((m) => <GalleryItem key={m.id} media={m} />)}
+              </div>
+            </section>
+          )}
+          <div className="engage-bar">
+            <LikeButton contentId={item.id} initialCount={item.like_count} initialLiked={item.liked} />
+            <a href="#comments-title" className="action-btn">
+              <Icon name="comment" /> <span className="count">{comments}</span> Comments
+            </a>
+            <ShareButton path={item.path} title={item.title} />
+          </div>
+          <Comments contentId={item.id} onPosted={() => setCommentBump((n) => n + 1)} />
         </div>
       </div>
 

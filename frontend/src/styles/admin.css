@@ -93,24 +93,47 @@ a.stat-tile:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(
 .save-bar .status.dirty { color: var(--warning); }
 .save-bar .buttons { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
-.md-editor { border: var(--rule) solid var(--border); background: var(--surface-raised); }
+.md-editor { border: var(--rule) solid var(--border); background: var(--surface-raised); display: flex; flex-direction: column; }
 .md-editor:focus-within { border-color: var(--text); }
 .md-editor.invalid { border-color: var(--danger); }
-.md-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: var(--space-1); border-bottom: 1px solid var(--border); background: var(--bg-alt); }
-.md-toolbar button { appearance: none; min-width: 34px; height: 34px; padding: 0 var(--space-2); border: 1px solid transparent; background: transparent; color: var(--text); font: 700 0.85rem var(--font-mono); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
-.md-toolbar button:hover { border-color: var(--text); background: var(--surface-raised); }
+.md-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: var(--space-2); border-bottom: 1px solid var(--border); background: var(--bg-alt); }
+.md-group { display: inline-flex; flex-wrap: wrap; gap: 2px; padding-right: 4px; margin-right: 2px; border-right: 1px solid var(--border); }
+.md-group:last-child { border-right: 0; }
+.md-toolbar button { appearance: none; min-width: 38px; height: 38px; padding: 0 var(--space-2); border: 1px solid transparent; background: transparent; color: var(--text); font: 700 0.9rem var(--font-mono); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.md-toolbar button:hover:not(:disabled) { border-color: var(--text); background: var(--surface-raised); }
+.md-toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
 .md-toolbar button[aria-pressed='true'] { background: var(--primary); color: var(--on-primary); }
-.md-toolbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
 .md-toolbar .grow { flex: 1; }
-.md-panes { display: grid; }
-.md-panes.split { grid-template-columns: 1fr; }
-@media (min-width: 900px) { .md-panes.split { grid-template-columns: 1fr 1fr; } .md-panes.split .md-preview { border-left: 1px solid var(--border); } }
-.md-panes .textarea { border: 0; min-height: 360px; outline-offset: -3px; background: transparent; }
-.md-panes.compact .textarea { min-height: 160px; }
-.md-preview { padding: var(--space-4); overflow: auto; max-height: 75vh; min-height: 160px; background: var(--bg); position: relative; }
-.md-preview .preview-label { position: sticky; top: calc(-1 * var(--space-4)); margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) var(--space-3); padding: var(--space-1) var(--space-3); background: var(--bg-alt); font: 600 0.7rem var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-.md-preview .prose { font-size: 1rem; }
+.md-help { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); background: var(--bg); font-size: 0.88rem; }
+.md-help table { border-collapse: collapse; width: 100%; }
+.md-help td { padding: 4px var(--space-3) 4px 0; vertical-align: top; border-bottom: 1px solid var(--border); }
+.md-help td:first-child { white-space: nowrap; width: 1%; }
+.md-help p { margin: var(--space-2) 0 0; color: var(--text-muted); }
+
+/* Big by default; the writing area can still be dragged taller. */
+.md-panes { display: grid; flex: 1; min-height: 0; }
+.md-panes .textarea { border: 0; min-height: clamp(480px, 65vh, 860px); padding: var(--space-4) var(--space-5); font-size: 1rem; line-height: 1.75; outline-offset: -3px; background: transparent; resize: vertical; }
+.md-panes.compact .textarea { min-height: 300px; }
+.md-preview { padding: var(--space-4) var(--space-5); overflow: auto; min-height: 300px; background: var(--bg); position: relative; }
+.md-panes.preview .md-preview { min-height: clamp(480px, 65vh, 860px); }
+.md-panes.preview.compact .md-preview { min-height: 300px; }
+@media (min-width: 900px) {
+  .md-panes.split { grid-template-columns: 1fr 1fr; }
+  /* The preview follows the writing area's height and scrolls, instead of stretching the page. */
+  .md-panes.split .md-preview { contain: size; min-height: 0; border-left: 1px solid var(--border); }
+}
+@media (max-width: 899px) { .md-panes.split .md-preview { max-height: 70vh; border-top: 1px solid var(--border); } }
+.md-preview .preview-label { position: sticky; top: calc(-1 * var(--space-4)); margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-5)) var(--space-3); padding: var(--space-1) var(--space-3); background: var(--bg-alt); font: 600 0.7rem var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.md-preview .prose { font-size: 1.02rem; }
 .md-footer { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-top: 1px solid var(--border); font: 500 0.75rem var(--font-mono); color: var(--text-muted); flex-wrap: wrap; }
+
+/* Full screen: fills the window; media dialogs (z-index 100) still open above it. */
+.md-editor.is-fullscreen { position: fixed; inset: 0; z-index: 90; border: 0; }
+.md-editor.is-fullscreen .md-panes { grid-template-rows: minmax(0, 1fr); }
+.md-editor.is-fullscreen .md-panes .textarea { min-height: 0; height: 100%; resize: none; }
+.md-editor.is-fullscreen .md-preview { min-height: 0; max-height: none; contain: size; }
+@media (max-width: 899px) { .md-editor.is-fullscreen .md-panes.split { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); } }
+body.md-fullscreen-open { overflow: hidden; }
 
 .media-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .media-tile { border: var(--rule) solid var(--border); background: var(--surface); position: relative; display: flex; flex-direction: column; min-width: 0; }

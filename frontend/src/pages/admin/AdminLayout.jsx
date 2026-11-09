@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import BackToTop from '../../components/BackToTop'
 import Icon from '../../components/Icon'
 import { Loading } from '../../components/States'
 import ThemeToggle from '../../components/ThemeToggle'
@@ -101,6 +102,7 @@ export default function AdminLayout() {
             <Outlet />
           </main>
         </div>
+        <BackToTop targetId="admin-main" />
       </ConfirmProvider>
     </RequireAdmin>
   )

@@ -28,15 +28,15 @@ docker compose up -d db          # creates databases vglug and vglug_test
 cd backend
 cp .env.example .env             # then edit: SECRET_KEY, DATABASE_URL, TEST_DATABASE_URL, ...
 uv sync                          # creates .venv from pyproject.toml / uv.lock
-uv run flask --app wsgi db upgrade   # apply migrations
-uv run flask --app wsgi seed         # initial admin + initial site content (safe to re-run)
-uv run flask --app wsgi run --debug  # API on http://127.0.0.1:5000
+uv run app.py                    # applies migrations, seeds missing content, API on http://127.0.0.1:5000
 
 # 3. Frontend (in another terminal)
 cd frontend
 npm install
 npm run dev                      # http://localhost:5173 (proxies /api and /media to Flask)
 ```
+
+`uv run app.py` runs the same steps as `flask db upgrade` and `flask seed` each time it starts. Seeding only adds what is missing, so admin edits are kept. Set `HOST` or `PORT` to change where it listens. It refuses to start when `APP_ENV=production`; use gunicorn there (see Deployment).
 
 To add clearly labelled **sample** content for development or demos, run `uv run flask --app wsgi seed-demo`. This command refuses to run when `APP_ENV=production`.
 

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Footer, { NewsletterBand } from '../../components/Footer'
+import BackToTop from '../../components/BackToTop'
 import Header from '../../components/Header'
 
 export default function PublicLayout() {
@@ -26,6 +27,7 @@ export default function PublicLayout() {
       </main>
       <NewsletterBand />
       <Footer />
+      <BackToTop />
     </>
   )
 }
