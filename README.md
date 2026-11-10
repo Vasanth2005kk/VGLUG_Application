@@ -161,6 +161,20 @@ cd frontend && npm test               # vitest + Testing Library
 
 **Frontend tests** cover theme persistence, the order of the navigation items, the Explore dropdown (keyboard and click), the mobile menu, and safe rendering of comments.
 
+## Continuous integration
+
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push to `main` and on every pull request (and manually from the Actions tab). It has three parallel jobs, and all three must pass:
+
+| Job | Checks |
+|-----|--------|
+| **Backend** | `uv sync --frozen`, ruff (syntax errors, undefined names, unused imports), migrations applied to an empty PostgreSQL 16, `flask db check` (models match migrations), `pytest` |
+| **Frontend** | `npm ci`, oxlint, vitest, `npm run build` |
+| **Docker** | shellcheck on all scripts, `docker compose config`, image build, full stack start, then [.github/scripts/docker-smoke-test.sh](.github/scripts/docker-smoke-test.sh): pages, API, admin sign-in, media upload, persistence across `down`/`up`, and a backup/restore drill |
+
+No repository secrets are needed: every password and key used in CI is generated randomly per run and masked in the logs. To make the checks mandatory, enable branch protection on `main` (**Settings → Branches → Add rule → Require status checks**) and select the three jobs.
+
+The smoke test is destructive, so it only runs against a fresh, empty test stack and refuses to run when the database already holds media.
+
 ## Deployment notes
 
 1. Build the frontend with `cd frontend && npm run build`.

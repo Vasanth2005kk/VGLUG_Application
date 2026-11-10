@@ -102,7 +102,8 @@ services:
 volumes:
   # Fixed names: data survives `docker compose down` and container rebuilds.
   # Only `docker compose down -v` or `docker volume rm` deletes them.
+  # The *_VOLUME variables exist only so an isolated test stack can use separate volumes.
   pgdata:
-    name: vglug_pgdata
+    name: ${PGDATA_VOLUME:-vglug_pgdata}
   uploads:
-    name: vglug_uploads
+    name: ${UPLOADS_VOLUME:-vglug_uploads}
