@@ -1,15 +1,108 @@
-# Optional: a local PostgreSQL for development. Credentials here are for local use only.
+# VGLUG Foundation website — full stack.
+#   cp .env.example .env    # then edit the secrets
+#   docker compose up -d --build
+# See DOCKER.md for configuration, backup, restore and migrating existing data.
+
+name: vglug
+
+x-backend-env: &backend-env
+  APP_ENV: ${APP_ENV:-production}
+  SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env (see .env.example)}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-vglug}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-vglug}
+  PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+  SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+  ADMIN_SESSION_HOURS: ${ADMIN_SESSION_HOURS:-8}
+  # nginx in the frontend container is one trusted proxy. Add 1 per extra proxy in front of it.
+  TRUST_PROXY_COUNT: ${TRUST_PROXY_COUNT:-1}
+  INITIAL_ADMIN_USERNAME: ${INITIAL_ADMIN_USERNAME:-vglug}
+  INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-vglug@123}
+  UPLOAD_FOLDER: /data/uploads
+  MAX_IMAGE_MB: ${MAX_IMAGE_MB:-10}
+  MAX_VIDEO_MB: ${MAX_VIDEO_MB:-200}
+  RATELIMIT_ENABLED: ${RATELIMIT_ENABLED:-true}
+  RATELIMIT_STORAGE_URI: ${RATELIMIT_STORAGE_URI:-memory://}
+  COMMENTS_REQUIRE_APPROVAL: ${COMMENTS_REQUIRE_APPROVAL:-true}
+  COMMENT_MAX_LENGTH: ${COMMENT_MAX_LENGTH:-2000}
+  COMMENT_MAX_LINKS: ${COMMENT_MAX_LINKS:-2}
+  SUBSCRIPTIONS_ENABLED: ${SUBSCRIPTIONS_ENABLED:-true}
+  EMAIL_BACKEND: ${EMAIL_BACKEND:-console}
+  EMAIL_FROM: ${EMAIL_FROM:-}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_SECURITY: ${SMTP_SECURITY:-starttls}
+  EMAIL_MAX_ATTEMPTS: ${EMAIL_MAX_ATTEMPTS:-5}
+  SUBSCRIPTION_TOKEN_HOURS: ${SUBSCRIPTION_TOKEN_HOURS:-48}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
 services:
   db:
     image: postgres:16
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: vglug
-      POSTGRES_PASSWORD: change-me
-      POSTGRES_DB: vglug
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-vglug}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-vglug}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./backend/scripts/create-test-db.sql:/docker-entrypoint-initdb.d/create-test-db.sql:ro
+      # Runs only when the data volume is first created: adds <db>_test for the backend test suite.
+      - ./backend/scripts/docker-init-test-db.sh:/docker-entrypoint-initdb.d/10-test-db.sh:ro
+    ports:
+      # Localhost only, for local tools and `uv run app.py`. 5433 avoids a host PostgreSQL on 5432.
+      - "127.0.0.1:${DB_HOST_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    image: vglug-backend:latest
+    restart: unless-stopped
+    command: ["web"]
+    environment:
+      <<: *backend-env
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-1}
+      GUNICORN_THREADS: ${GUNICORN_THREADS:-8}
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  email-worker:
+    build: ./backend   # same image as backend (shared build cache)
+    image: vglug-backend:latest
+    restart: unless-stopped
+    command: ["worker"]
+    environment: *backend-env
+    healthcheck:
+      # The worker serves no HTTP; healthy while its process (PID 1) is the email worker.
+      test: ["CMD-SHELL", "grep -q email-worker /proc/1/cmdline"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    image: vglug-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
 volumes:
+  # Fixed names: data survives `docker compose down` and container rebuilds.
+  # Only `docker compose down -v` or `docker volume rm` deletes them.
   pgdata:
+    name: vglug_pgdata
+  uploads:
+    name: vglug_uploads
