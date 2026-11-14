@@ -25,7 +25,7 @@ export default function PublicLayout() {
       <main id="main" tabIndex={-1} style={{ outline: 'none' }}>
         <Outlet />
       </main>
-      <NewsletterBand />
+      {/* <NewsletterBand /> */}
       <Footer />
       <BackToTop />
     </>

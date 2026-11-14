@@ -428,6 +428,13 @@ FOOTER = {
     # donation QR code are not published there and must be supplied through the admin panel.
     "phone": "+91 96775 04839",
     "copyright_text": f"{ORG_NAME} (VGLUG)",
+    # Donation account details supplied by the organisation; editable in Admin > Footer.
+    "bank_holder_name": "VGLUG Foundation",
+    "bank_account_number": "1208135000013738",
+    "bank_ifsc": "KVBL0001208",
+    "bank_name": "Karur Vysya Bank",
+    "bank_branch": "Villupuram",
+    "upi_id": "mswstatic.1450060426309930@kvbupi",
 }
 
 SOCIAL_LINKS = [

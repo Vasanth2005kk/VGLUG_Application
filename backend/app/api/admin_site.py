@@ -18,6 +18,9 @@ bp = Blueprint("admin_site", __name__, url_prefix="/api/admin")
 
 ANCHOR_RE = re.compile(r"^[a-z0-9-]{0,60}$")
 PHONE_RE = re.compile(r"^[0-9+()\-.\s]{0,60}$")
+ACCOUNT_NUMBER_RE = re.compile(r"^[0-9]{6,20}$")
+IFSC_RE = re.compile(r"^[A-Z]{4}0[A-Z0-9]{6}$")
+UPI_RE = re.compile(r"^[A-Za-z0-9._-]{2,}@[A-Za-z0-9]{2,}$")
 EXPLORE_CHILDREN = {"meetups", "events", "blogs"}
 
 
@@ -263,6 +266,12 @@ class FooterIn(BaseModel):
     donation_text: str = Field(default="", max_length=500)
     donation_qr_media_id: int | None = None
     donation_qr_alt: str = Field(default="", max_length=300)
+    bank_holder_name: str = Field(default="", max_length=120)
+    bank_account_number: str = Field(default="", max_length=40)
+    bank_ifsc: str = Field(default="", max_length=20)
+    bank_name: str = Field(default="", max_length=120)
+    bank_branch: str = Field(default="", max_length=120)
+    upi_id: str = Field(default="", max_length=120)
     copyright_text: str = Field(default="", max_length=300)
     social_links: list[SocialIn] = Field(default_factory=list, max_length=20)
 
@@ -292,6 +301,15 @@ def update_footer():
             errors["donation_qr_media_id"] = "Choose an uploaded image."
         elif not data.donation_qr_alt.strip():
             errors["donation_qr_alt"] = "Describe the QR code for screen-reader users."
+    # Account numbers are often typed in groups; IFSC codes are always upper case.
+    data.bank_account_number = re.sub(r"[\s-]", "", data.bank_account_number)
+    data.bank_ifsc = data.bank_ifsc.strip().upper()
+    if data.bank_account_number and not ACCOUNT_NUMBER_RE.match(data.bank_account_number):
+        errors["bank_account_number"] = "Use 6 to 20 digits."
+    if data.bank_ifsc and not IFSC_RE.match(data.bank_ifsc):
+        errors["bank_ifsc"] = "An IFSC code is 11 characters, e.g. KVBL0001208."
+    if data.upi_id.strip() and not UPI_RE.match(data.upi_id.strip()):
+        errors["upi_id"] = "Enter a UPI ID such as name@bank."
     for i, s in enumerate(data.social_links):
         if msg := check_link(s.url, allow_internal=False, allow_mailto=s.platform == "website"):
             errors[f"social_links.{i}.url"] = msg
@@ -303,6 +321,7 @@ def update_footer():
     for field in (
         "org_name", "short_name", "description", "email", "phone", "address", "registration_id",
         "donation_text", "donation_qr_alt", "copyright_text",
+        "bank_holder_name", "bank_account_number", "bank_ifsc", "bank_name", "bank_branch", "upi_id",
     ):
         setattr(footer, field, getattr(data, field).strip())
     footer.donation_qr_media_id = data.donation_qr_media_id

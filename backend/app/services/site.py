@@ -108,6 +108,12 @@ def serialize_footer(footer: FooterSettings) -> dict:
         "donation_text": footer.donation_text,
         "donation_qr": qr,
         "donation_qr_alt": footer.donation_qr_alt,
+        "bank_holder_name": footer.bank_holder_name,
+        "bank_account_number": footer.bank_account_number,
+        "bank_ifsc": footer.bank_ifsc,
+        "bank_name": footer.bank_name,
+        "bank_branch": footer.bank_branch,
+        "upi_id": footer.upi_id,
         "copyright_text": footer.copyright_text,
         "social_links": [{"id": s.id, "platform": s.platform, "url": s.url, "label": s.label} for s in socials],
     }

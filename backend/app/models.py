@@ -282,6 +282,12 @@ class FooterSettings(db.Model):
     donation_text = db.Column(db.String(500), nullable=False, default="")
     donation_qr_media_id = db.Column(db.Integer, db.ForeignKey("media.id", ondelete="SET NULL"))
     donation_qr_alt = db.Column(db.String(300), nullable=False, default="")
+    bank_holder_name = db.Column(db.String(120), nullable=False, default="", server_default="")
+    bank_account_number = db.Column(db.String(40), nullable=False, default="", server_default="")
+    bank_ifsc = db.Column(db.String(20), nullable=False, default="", server_default="")
+    bank_name = db.Column(db.String(120), nullable=False, default="", server_default="")
+    bank_branch = db.Column(db.String(120), nullable=False, default="", server_default="")
+    upi_id = db.Column(db.String(120), nullable=False, default="", server_default="")
     copyright_text = db.Column(db.String(300), nullable=False, default="")
     updated_at = db.Column(db.DateTime(timezone=True), nullable=False, server_default=func.now(), default=utcnow, onupdate=utcnow)
 

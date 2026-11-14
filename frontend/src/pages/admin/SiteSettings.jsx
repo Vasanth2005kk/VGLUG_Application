@@ -161,7 +161,8 @@ export function NavigationSettings() {
   )
 }
 
-const FOOTER_FIELDS = ['org_name', 'short_name', 'description', 'email', 'phone', 'address', 'registration_id', 'donation_text', 'donation_qr_alt', 'copyright_text']
+const FOOTER_FIELDS = ['org_name', 'short_name', 'description', 'email', 'phone', 'address', 'registration_id', 'donation_text', 'donation_qr_alt', 'copyright_text',
+  'bank_holder_name', 'bank_account_number', 'bank_ifsc', 'bank_name', 'bank_branch', 'upi_id']
 
 export function FooterSettings() {
   const [form, setForm] = useState(null)
@@ -252,6 +253,18 @@ export function FooterSettings() {
                 hint="e.g. “UPI QR code to donate to VGLUG”." />
               <TextArea label="Donation text" value={form.donation_text} onChange={(v) => set({ donation_text: v })} maxLength={500} style={{ minHeight: 80 }} />
             </div>
+          </div>
+        </div>
+        <div className="panel">
+          <div className="panel-head"><h2>Donation account details</h2></div>
+          <div className="panel-body form-grid two">
+            <p className="muted span-2">Shown on the Donate page beside the QR code. Leave a field empty to hide it; double-check every value against the bank’s records.</p>
+            <TextField label="Account holder name" value={form.bank_holder_name} onChange={(v) => set({ bank_holder_name: v })} error={errors.bank_holder_name} maxLength={120} />
+            <TextField label="Account number" inputMode="numeric" value={form.bank_account_number} onChange={(v) => set({ bank_account_number: v })} error={errors.bank_account_number} maxLength={40} />
+            <TextField label="IFSC code" value={form.bank_ifsc} onChange={(v) => set({ bank_ifsc: v })} error={errors.bank_ifsc} maxLength={20} />
+            <TextField label="Bank name" value={form.bank_name} onChange={(v) => set({ bank_name: v })} error={errors.bank_name} maxLength={120} />
+            <TextField label="Branch" value={form.bank_branch} onChange={(v) => set({ bank_branch: v })} error={errors.bank_branch} maxLength={120} />
+            <TextField label="UPI ID" value={form.upi_id} onChange={(v) => set({ upi_id: v })} error={errors.upi_id} maxLength={120} hint="e.g. name@bank" />
           </div>
         </div>
         <div className="panel">

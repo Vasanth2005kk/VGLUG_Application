@@ -568,23 +568,40 @@ body.nav-locked {
 /* ---- Donate -------------------------------------------------------------- */
 .donate-grid {
   display: grid;
-  gap: var(--space-7);
-  align-items: start;
+  gap: var(--space-5);
+  align-items: stretch;
+  max-width: 400px;
+  margin-inline: auto;
 }
 
-@media (min-width: 720px) {
+/* QR code on the left, account details filling the rest of the row. Below this width the
+   UPI ID no longer fits on one line beside the QR code, so the two cards stack. */
+@media (min-width: 900px) {
   .donate-grid {
-    grid-template-columns: 314px minmax(0, 1fr);
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: var(--space-6);
+    max-width: none;
   }
+
+  .donate-grid-single {
+    grid-template-columns: minmax(0, 640px);
+  }
+
+  .donate-qr {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+.donate-support {
+  margin-top: var(--space-8);
 }
 
 /* The QR card stays white in dark mode so the code remains scannable. */
 .donate-qr {
-  justify-self: center;
-  width: 100%;
-  max-width: 314px;
   margin: 0;
-  padding: var(--space-4);
+  padding: var(--space-5);
   background: #fff;
   border: var(--rule) solid var(--border);
   color: #2b0207;
@@ -594,13 +611,97 @@ body.nav-locked {
 .donate-qr img {
   display: block;
   width: 100%;
+  max-width: 280px;
   height: auto;
+  margin-inline: auto;
 }
 
 .donate-qr figcaption {
   margin-top: var(--space-3);
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+.donate-account {
+  padding: var(--space-5);
+  background: var(--surface);
+  border: var(--rule) solid var(--border);
+}
+
+.donate-account h2 {
+  margin: 0 0 var(--space-4);
+  font-size: 1.375rem;
+}
+
+.donate-account dl {
+  margin: 0;
+}
+
+.donate-account dl > div {
+  padding: var(--space-3) 0;
+  border-top: var(--rule) solid var(--border);
+}
+
+.donate-account dl > div:last-child {
+  padding-bottom: 0;
+}
+
+.donate-account dt {
+  margin-bottom: var(--space-1);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.donate-account dd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.donate-account dd > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Label and value side by side, like a table, once the card is wide enough. */
+@media (min-width: 1000px) {
+  .donate-account dl > div {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .donate-account dt {
+    margin-bottom: 0;
+  }
+}
+
+.donate-code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.donate-copy {
+  flex: none;
+  padding: 0.15rem 0.6rem;
+  font: 600 0.75rem var(--font-body);
+  color: var(--accent-text);
+  background: transparent;
+  border: var(--rule) solid var(--border-strong);
+  cursor: pointer;
+}
+
+.donate-copy:hover {
+  background: var(--bg-alt);
 }
 
 .donate-list {

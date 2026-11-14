@@ -105,11 +105,29 @@ def test_footer_management(client, admin):
         {"platform": "myspace", "url": "https://x.example"}]}).status_code == 422
 
 
+def test_donation_account_details(client, admin):
+    payload = {
+        "bank_holder_name": " Example Trust ", "bank_account_number": "1234 5678 9012", "bank_ifsc": "abcd0123456",
+        "bank_name": "Example Bank", "bank_branch": "Main", "upi_id": "example.trust@bank",
+    }
+    assert admin.put("/api/admin/footer", json=payload).status_code == 200
+    site = client.get("/api/site").get_json()["data"]["footer"]
+    assert site["bank_holder_name"] == "Example Trust"
+    assert site["bank_account_number"] == "123456789012" and site["bank_ifsc"] == "ABCD0123456"
+    assert site["upi_id"] == "example.trust@bank"
+
+    bad = admin.put("/api/admin/footer", json={"bank_account_number": "12ab", "bank_ifsc": "ABC", "upi_id": "nope"})
+    assert set(bad.get_json()["error"]["fields"]) == {"bank_account_number", "bank_ifsc", "upi_id"}
+    cleared = admin.put("/api/admin/footer", json={}).get_json()["data"]
+    assert cleared["bank_account_number"] == "" and cleared["upi_id"] == ""
+
+
 def test_seeded_footer_has_official_channels(client, seeded):
     footer = client.get("/api/site").get_json()["data"]["footer"]
     platforms = [s["platform"] for s in footer["social_links"]]
     assert {"telegram", "github", "youtube"} <= set(platforms)
     assert footer["phone"] and footer["email"] == "" and footer["donation_qr"] is None
+    assert footer["bank_ifsc"] == "KVBL0001208" and footer["upi_id"].endswith("@kvbupi")
 
 
 def test_link_items_are_validated(client, admin):
