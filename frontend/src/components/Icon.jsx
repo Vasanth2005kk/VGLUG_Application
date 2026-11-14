@@ -85,11 +85,8 @@ export const PLATFORM_LABELS = {
   linkedin: 'LinkedIn',
   youtube: 'YouTube',
   github: 'GitHub',
-  gitlab: 'GitLab',
-  mastodon: 'Mastodon',
   telegram: 'Telegram',
   whatsapp: 'WhatsApp',
-  matrix: 'Matrix',
   website: 'Website',
 }
 
